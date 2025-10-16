@@ -14,10 +14,10 @@ from twilio.rest import Client
 URL = "https://www.amazon.com.br/Apple-iPhone-15-128-GB/dp/B0CP6CVJSG/ref=sr_1_5?dib=..."  # coloque a URL completa aqui
 PRECO_ALVO = 300.0
 
-ACCOUNT_SID = "AC35cf68c12eba3c72662f2b91755bf419"
-AUTH_TOKEN = "d10d8a83f0c5912c71e4cfef750e2b04"
-FROM_WHATSAPP = "whatsapp:+14155238886"
-TO_WHATSAPP = "whatsapp:+555599754483"
+ACCOUNT_SID = "AAAAAAAAAAAAAAAAAABBBBBBBBBB"
+AUTH_TOKEN = "jiulgljguyotlgljkguy7tuygu"
+FROM_WHATSAPP = "whatsapp:+4413524886"
+TO_WHATSAPP = "whatsapp:+2222997122584"
 
 # ---------- FUNÇÕES ----------
 def configurar_driver():
