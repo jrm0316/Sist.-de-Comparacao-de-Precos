@@ -79,7 +79,7 @@ def enviar_whatsapp(produto, preco):
         client.messages.create(
             from_=FROM_WHATSAPP,
             body=mensagem,
-            #mensagem=f"Oferta encontrada!\n\n{produto}\n Preço: R${preco}\n🔗 Link: {URL}",
+            #mensagem=f"Oferta encontrada!\n\n{produto}\n Preço: R${preco}\n Link: {URL}",
             to=TO_WHATSAPP
         )
         print("Mensagem enviada no WhatsApp!")
