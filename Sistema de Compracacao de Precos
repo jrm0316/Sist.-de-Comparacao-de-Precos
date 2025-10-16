@@ -1,0 +1,129 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from time import sleep
+import schedule
+import time
+from twilio.rest import Client
+
+# ---------- CONFIGURAÇÕES ----------
+URL = "https://www.amazon.com.br/Apple-iPhone-15-128-GB/dp/B0CP6CVJSG/ref=sr_1_5?dib=..."  # coloque a URL completa aqui
+PRECO_ALVO = 300.0
+
+ACCOUNT_SID = "AC35cf68c12eba3c72662f2b91755bf419"
+AUTH_TOKEN = "d10d8a83f0c5912c71e4cfef750e2b04"
+FROM_WHATSAPP = "whatsapp:+14155238886"
+TO_WHATSAPP = "whatsapp:+555599754483"
+
+# ---------- FUNÇÕES ----------
+def configurar_driver():
+    chrome_options = Options()
+    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    service = Service()
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
+
+def esperar_pagina(driver, tempo_extra=5):
+    WebDriverWait(driver, 30).until(lambda d: d.execute_script("return document.readyState") == "complete")
+    sleep(tempo_extra)
+
+def obter_preco(driver):
+    driver.get(URL)
+    print("Página atual:", driver.current_url)
+    esperar_pagina(driver, tempo_extra=5)
+
+    produto = None
+    preco = None
+
+    # Captura o título do produto
+    try:
+        titulo_elemento = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "productTitle"))
+        )
+        produto = titulo_elemento.text.strip()
+    except TimeoutException:
+        print("Não conseguiu achar o título do produto.")
+    except Exception as e:
+        print("Erro ao capturar título:", e)
+
+    # Captura o preço do produto
+    try:
+        preco_inteiro = driver.find_element(By.CLASS_NAME, "a-price-whole").text
+        preco_decimal = driver.find_element(By.CLASS_NAME, "a-price-fraction").text
+        preco_texto = f"{preco_inteiro},{preco_decimal}"
+        preco = float(preco_texto.replace(".", "").replace(",", "."))
+    except Exception as e:
+        print("Não conseguiu achar o preço:", e)
+
+    if produto and preco:
+        print(f"Produto: {produto}\n Preço atual: R${preco}")
+    else:
+        print("Não conseguiu capturar produto ou preço nesta execução.")
+    return produto, preco
+
+def enviar_whatsapp(produto, preco):
+    client = Client("AC35cf68c12eba3c72662f2b91755bf419", "d10d8a83f0c5912c71e4cfef750e2b04")
+    mensagem = (
+        f" OFERTA PROMOCIONAL!!\n\n"
+        f"Produto: {produto}\n"
+        f"Preço: R${preco:.2f}\n"
+        f"Link: {URL}"
+    )
+    try:
+        client.messages.create(
+            from_=FROM_WHATSAPP,
+            body=mensagem,
+            #mensagem=f"Oferta encontrada!\n\n{produto}\n Preço: R${preco}\n🔗 Link: {URL}",
+            to=TO_WHATSAPP
+        )
+        print("Mensagem enviada no WhatsApp!")
+    except Exception as e:
+        print("Erro ao enviar WhatsApp:", e)
+    #print("Mensagem enviada com SID:", mensagem.sid)
+
+
+'''client = Client("AC35cf68c12eba3c72662f2b91755bf419", "d10d8a83f0c5912c71e4cfef750e2b04")
+   mensagem = f"Oferta encontrada!\n\n{produto}\n Preço: R${preco}\n Link: {URL}"
+   try:
+   #mensagem = client.messages.create(
+        client.messages.create(
+            from_=FROM_WHATSAPP,
+            body="Teste de envio via Twilio WhatsApp!",
+            to=TO_WHATSAPP
+        )
+        print("Mensagem enviada no WhatsApp!")
+   except Exception as e:
+        print("Erro ao enviar WhatsApp:", e)'''
+
+
+def checar_preco():
+    print("Checando preço...")
+    driver = configurar_driver()
+    try:
+        produto, preco_atual = obter_preco(driver)
+    finally:
+        driver.quit()
+
+    if not produto or not preco_atual:
+        print("Falha ao obter produto ou preço, tentando na próxima checagem.\n")
+        return
+
+    if preco_atual >= PRECO_ALVO:
+        enviar_whatsapp(produto, preco_atual)
+        return schedule.CancelJob
+
+# ---------- AGENDAMENTO ----------
+# schedule.every().day.at("09:00").do(checar_preco)
+schedule.every(60).seconds.do(checar_preco)
+
+print("Monitor de preços iniciado. Aguardando próxima checagem...")
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
