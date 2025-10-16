@@ -68,7 +68,7 @@ def obter_preco(driver):
     return produto, preco
 
 def enviar_whatsapp(produto, preco):
-    client = Client("AC35cf68c12eba3c72662f2b91755bf419", "d10d8a83f0c5912c71e4cfef750e2b04")
+    client = Client("AAAAAAAAAAAAAAAAAAAAAAAAAABBBBBB", "fsgsdgdfhftgtjhytujhfghtfgh")
     mensagem = (
         f" OFERTA PROMOCIONAL!!\n\n"
         f"Produto: {produto}\n"
@@ -86,20 +86,6 @@ def enviar_whatsapp(produto, preco):
     except Exception as e:
         print("Erro ao enviar WhatsApp:", e)
     #print("Mensagem enviada com SID:", mensagem.sid)
-
-
-'''client = Client("AC35cf68c12eba3c72662f2b91755bf419", "d10d8a83f0c5912c71e4cfef750e2b04")
-   mensagem = f"Oferta encontrada!\n\n{produto}\n Preço: R${preco}\n Link: {URL}"
-   try:
-   #mensagem = client.messages.create(
-        client.messages.create(
-            from_=FROM_WHATSAPP,
-            body="Teste de envio via Twilio WhatsApp!",
-            to=TO_WHATSAPP
-        )
-        print("Mensagem enviada no WhatsApp!")
-   except Exception as e:
-        print("Erro ao enviar WhatsApp:", e)'''
 
 
 def checar_preco():
